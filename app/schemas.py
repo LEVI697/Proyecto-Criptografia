@@ -5,11 +5,15 @@ class CrearUsuario(BaseModel):
     nombre: Annotated[str, Field(min_length=3)]
     correo: EmailStr
     rol: Annotated[str, Field(pattern="^(jefe|staff|estudiante)$")]
-    matricula: str
+    matricula: Annotated[str, Field(min_length=10, max_length=10, pattern=r'^\d+$', description="Debe ser de 10 números")]
 
-class Token(BaseModel):
+class GenerarToken(BaseModel):
     access_token: str
     token_type: str
+
+class ValidarContraseña(BaseModel):
+    matricula: int = Field(...)
+    contraseña_provisional: str = Field(...)
 
 class CambioContraseña(BaseModel):
     nueva_contraseña: Annotated[

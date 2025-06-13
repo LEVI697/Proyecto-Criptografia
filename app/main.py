@@ -13,4 +13,4 @@ app = FastAPI(
 
 app.include_router(usuario.ruta, prefix="/auth", tags=["Autenticación"])
 app.include_router(jefe.ruta, prefix="/jefe", tags=["Administración"])
-app.include_router(estudiante.ruta, prefix="/estudiante", tags=["Estudiantes"])
+app.include_router(estudiante.ruta, prefix="/estudiante", tags=["Alumnado"])

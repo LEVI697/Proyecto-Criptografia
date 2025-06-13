@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.reglas import CrearUsuario
+from app.schemas import CrearUsuario
 from app.crud import crear_usuario
 from app.auth import obtener_usuario_actual, enviar_correo
 from app.basedatos import SesionLocal
@@ -21,10 +21,11 @@ def registrar_usuario(usuario: CrearUsuario, db: Session = Depends(obtener_bd), 
     if usuario_actual.rol != "jefe":
         raise HTTPException(status_code=403, detail="Solo los administradores pueden registrar usuarios")
     
-    longitud = 12
+    longitud = 10
     caracteres = string.ascii_letters + string.digits
     contraseña_provisional = ''.join(random.choice(caracteres) for _ in range(longitud))
     contraseña_hash = ph.hash(contraseña_provisional)
+
     nuevo_usuario = crear_usuario(
         db,
         nombre=usuario.nombre,
@@ -40,11 +41,8 @@ def registrar_usuario(usuario: CrearUsuario, db: Session = Depends(obtener_bd), 
         f"Hola {usuario.nombre},\n\n"
         f"Tu cuenta ha sido creada exitosamente.\n"
         f"Tu contraseña provisional es: {contraseña_provisional}\n\n"
-        f"PCambia tu contraseña lo antes posible siguiendo el link: \n{enlace_cambio}\n\n"
+        f"Para activar tu cuenta accede al siguiente link: \n{enlace_cambio}\n\n"
     )
-    enviar_correo(
-        destinatario=usuario.correo,
-        asunto="Activa tu cuenta y cambia tu contraseña",
-        cuerpo=cuerpo_correo
-    )
+
+    enviar_correo(destinatario=usuario.correo, asunto="[UniTrack] Cambia la contraseña para activar tu cuenta", cuerpo=cuerpo_correo)
     return {"mensaje": f"Usuario {usuario.nombre} creado correctamente"}

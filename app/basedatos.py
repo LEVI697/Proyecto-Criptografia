@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 from argon2 import PasswordHasher
 
 load_dotenv()
-
 URL_BD = os.getenv("URL_BaseDatos")
+
 if not URL_BD:
     raise RuntimeError("La URL de la base de datos no está configurada en .env")
 
@@ -32,9 +32,9 @@ def crear_jefe():
             )
             db.add(jefe)
             db.commit()
-            print("Jefe creado en la base de datos.")
+            print("Datos guardados.")
         else:
-            print("Jefe ya existe en la base de datos.")
+            print("Ya se ha registrado un jefe.")
     finally:
         db.close()
 

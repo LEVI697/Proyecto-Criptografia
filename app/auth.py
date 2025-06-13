@@ -12,8 +12,7 @@ from app.basedatos import SesionLocal
 
 load_dotenv()
 llave = os.getenv("Clave_Secreta")
-algoritmo = "HS256"
-esquema = OAuth2PasswordBearer(tokenUrl="/auth/token")
+esquema = OAuth2PasswordBearer(tokenUrl="/auth/login")
 ph = PasswordHasher()
 
 def obtener_bd():
@@ -40,7 +39,7 @@ def obtener_usuario_actual(token: str = Depends(esquema), db: Session = Depends(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, llave, algorithms=[algoritmo])
+        payload = jwt.decode(token, llave, algorithms=["HS256"])
         matricula: str = payload.get("sub")
         if matricula is None:
             raise error_credenciales
