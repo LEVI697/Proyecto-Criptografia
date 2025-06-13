@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, HTTPException, status, Header, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
@@ -8,8 +8,10 @@ from dotenv import load_dotenv
 from app.basedatos import SesionLocal
 from app.schemas import GenerarToken, CambioContraseña, ValidarContraseña
 from app.crud import obtener_usuario, actualizar_contraseña
-from app.auth import ph, jwt, llave
+from app.auth import ph, jwt, llave, obtener_usuario_actual
 from app.modelos import Usuario
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
 
 load_dotenv()
 llave = os.getenv("Clave_Secreta")
@@ -73,3 +75,23 @@ def establecer_contraseña(datos: CambioContraseña, change_token: str = Header(
     actualizar_contraseña(db, usuario.matricula, datos.nueva_contraseña)
 
     return {"mensaje": "Contraseña establecida correctamente. Ahora puedes iniciar sesión."}
+
+@ruta.post("/generar-claves")
+def generar_claves(db: Session = Depends(obtener_bd), usuario_actual: Usuario = Depends(obtener_usuario_actual)):
+    if usuario_actual.rol not in ["jefe", "staff"]:
+        raise HTTPException(status_code=403, detail="Solo jefes y staff pueden generar claves")
+
+    llave_privada = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    privada_pem = llave_privada.private_bytes(encoding=serialization.Encoding.PEM, format=serialization.PrivateFormat.PKCS8, encryption_algorithm=serialization.NoEncryption())
+    publica_pem = llave_privada.public_key().public_bytes(encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo)
+
+    usuario_actual = db.merge(usuario_actual)
+    usuario_actual.clave_publica = publica_pem.decode("utf-8")
+    db.commit()
+    db.refresh(usuario_actual)
+
+    return Response(
+        content=privada_pem,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": "attachment; filename=llave_privada.pem"}
+    )

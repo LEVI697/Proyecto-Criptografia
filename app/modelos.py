@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text, LargeBinary
 from sqlalchemy.orm import relationship
 from app.basedatos import Base
 
@@ -11,6 +11,7 @@ class Usuario(Base):
     matricula = Column(String(10), unique=True)
     rol = Column(String(15))
     primer_login = Column(Boolean, default=True)
+    clave_publica = Column(Text, nullable=True)
 
     estudiante = relationship("Estudiante", uselist=False, back_populates="usuario")
 
