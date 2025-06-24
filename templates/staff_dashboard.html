@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Dashboard Staff</title>
+    <link rel="stylesheet" href="/static/stylesJefeDashboard.css">
+    <style>
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                background: rgba(139, 92, 246, 0.15);
+                backdrop-filter: blur(10px);
+                animation: modalFadeIn 0.3s ease-out;
+            }
+
+            .label-modal {
+                position: static;
+                top: -12px;
+                left: 20px;
+                background: #fafbff;
+                color: #8b5cf6;
+                padding: 0 0.8rem;
+                font-size: 0.9rem;
+                font-weight: 600;
+                border-radius: 6px;
+            }
+
+            @keyframes modalFadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            @keyframes modalSlideIn {
+                from { 
+                    opacity: 0;
+                    transform: translateY(-30px) scale(0.9);
+                }
+                to { 
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+
+            .modal-content {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                margin: 5% auto;
+                padding: 4rem;
+                width: 90%;
+                max-width: 650px;
+                border-radius: 24px;
+                box-shadow: 0 20px 60px rgba(139, 92, 246, 0.15);
+                position: relative;
+                overflow: hidden;
+                animation: modalSlideIn 0.4s ease-out;
+            }
+
+            /* Gradient border effect */
+            .modal-content::before {
+                content: '';
+                position: absolute;
+                top: -2px;
+                left: -2px;
+                right: -2px;
+                bottom: -2px;
+                background: linear-gradient(45deg, #8b5cf6, #6366f1, #3b82f6, #8b5cf6);
+                border-radius: 26px;
+                z-index: -1;
+                opacity: 0.3;
+            }
+
+            .modal h2 {
+                font-size: 2.2rem;
+                margin-bottom: 2.5rem;
+                color: #1f2937;
+                text-align: center;
+                font-weight: 700;
+                position: relative;
+            }
+
+            .modal h2::after {
+                content: '';
+                position: absolute;
+                bottom: -15px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 80px;
+                height: 4px;
+                background: linear-gradient(45deg, #8b5cf6, #6366f1);
+                border-radius: 2px;
+            }
+
+            .close {
+                position: absolute;
+                top: 20px;
+                right: 25px;
+                color: #9ca3af;
+                font-size: 2rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background: rgba(139, 92, 246, 0.1);
+            }
+
+            .close:hover,
+            .close:focus {
+                color: #8b5cf6;
+                background: rgba(139, 92, 246, 0.2);
+                transform: rotate(90deg) scale(1.1);
+            }
+
+            .modal .form-group {
+                position: relative;
+                margin-bottom: 3rem;
+            }
+
+            .modal button {
+                width: 100%;
+                background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+                border: none;
+                color: white;
+                padding: 1.4rem;
+                border-radius: 14px;
+                font-size: 1.1rem;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-top: 0.5rem;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .modal button::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.6s ease;
+            }
+
+            .modal button:hover::before {
+                left: 100%;
+            }
+
+            .modal button:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 15px 35px rgba(139, 92, 246, 0.25);
+            }
+
+            /* Responsive para el modal */
+            @media (max-width: 768px) {
+                .modal-content {
+                    width: 95%;
+                    margin: 10% auto;
+                    padding: 2rem;
+                }
+                
+                .modal h2 {
+                    font-size: 1.6rem;
+                }
+            }
+        </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="nav-content">
+        <div class="nav-logo">
+          <h1>Expedientes Universitarios</h1>
+        </div>
+        <div class="nav-user">
+          <span class="user-name">{{ usuario.nombre }}</span>
+          <span class="user-role">{{ usuario.rol | capitalize }}</span>
+          <a href="/auth/logout" class="btn-logout">Cerrar sesión</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="action-btn" id="btn-generar-llaves">Generar llaves</button>
+      <button class="action-btn" id="btn-obtener">Obtener clave secreta</button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="dashboard-container">
+      <section class="register-section">
+        <h2>Registrar estudiante</h2>
+        <form action="/staff/dashboard/registrarEstudiante" method="post" enctype="multipart/form-data">
+          <div class="form-group">
+            <input type="text" name="nombre" id="nombre" placeholder="Nombre"
+              required>
+            <label for="nombre" class="form-group-label">Nombre</label>
+          </div>
+          <div class="form-group">
+            <input type="email" name="correo" id="correo" placeholder="Correo"
+              required>
+            <label for="correo" class="form-group-label">Correo</label>
+          </div>
+          <div class="form-group">
+            <input type="text" name="matricula" id="matricula"
+              placeholder="Matrícula" required>
+            <label for="matricula" class="form-group-label">Matrícula</label>
+          </div>
+          <div class="form-group">
+            <input type="tel" name="telefono" id="telefono"
+              placeholder="Teléfono" required>
+            <label for="telefono" class="form-group-label">Teléfono</label>
+          </div>
+           <div class="form-group">
+              <input type="file" name="documento" id="documento" placeholder="Documento" required>
+              <label for="documento" class ="form-group-label">Documento</label>
+           </div>
+           <div class="form-group">
+              <input type="file" name="llave_simetrica" id="llave_simetrica" placeholder="Llave para cifrar el documento" required>
+              <label for="llave_simetrica" class ="form-group-label">Llave para cifrar el documento</label>
+           </div>
+          <button type="submit" class="btn-registrar">Registrar
+            Estudiante</button>
+        </form>
+      </section>
+
+       <section class="list-section">
+                <h2>Lista de estudiantes</h2>
+                <ul class="staff-list">
+                    {% for estudiante in estudiantes %}
+                    <li class="staff-item">
+                        <div class="staff-info">
+                            <span class="staff-name">{{ estudiante.nombre}}</span>
+                            <span class="staff-email">{{ estudiante.correo}}</span>
+                            <span class="staff-matricula">{{estudiante.matricula }}</span>
+                            <span class="staff-telefono">{{estudiante.estudiante.telefono }}</span>
+                        </div>
+                        <div class="staff-actions">
+                            {% if estudiante.estudiante.documentos %}
+                                {% set doc = estudiante.estudiante.documentos[0] %}
+                                <button class="action-btn" onclick="abrirModalVerPDF('{{ doc.id }}')">VER EXPEDIENTE DE PREPARATORIA</button>
+                            {% else %}
+                                <span style="color: gray;">Sin documento cargado</span>
+                            {% endif %}
+                        </div>
+                        <!-- Visualización de calificaciones para cada estudiante -->
+                        <button class="btn-calificaciones" type="button" onclick="toggleCalificaciones('{{ estudiante.matricula }}')">Ver calificaciones</button>
+                        <div id="calificaciones-{{ estudiante.matricula }}" class="calificaciones" style="display:none; margin-left:1rem;">
+                            <ul>
+                                {% for cal in historiales[estudiante.matricula] %}
+                                    <li><strong>{{ cal.materia }}:</strong> {{ cal.calificacion }}</li>
+                                {% else %}
+                                    <li>No hay calificaciones registradas.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="staff-actions">
+                            <form action="/staff/dashboard/eliminarEstudiante" method="post">
+                                <input type="hidden" name="matricula" value="{{ estudiante.matricula }}">
+                                <button type="submit" class="btn-eliminar">Eliminar</button>
+                            </form>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="staff-item">No hay estudiantes registrados.</li>
+                    {% endfor %}
+                </ul>
+            </section>
+      <!-- Formulario para editar calificaciones (staff) -->
+      <section class="register-section">
+        <h2>Editar Calificaciones</h2>
+        <form action="/staff/dashboard/editarCalificaciones" method="post" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="matricula_estudiante">Matrícula del estudiante</label>
+            <input type="text" name="matricula_estudiante" required>
+          </div>
+          <div class="form-group">
+            <label for="ingenieria_de_software">Ingeniería de Software</label>
+            <input type="text" name="ingenieria_de_software" required placeholder="Calificación (A, B, C, etc.)">
+          </div>
+          <div class="form-group">
+            <label for="compiladores">Compiladores</label>
+            <input type="text" name="compiladores" required placeholder="Calificación (A, B, C, etc.)">
+          </div>
+          <div class="form-group">
+            <label for="criptografia">Criptografía</label>
+            <input type="text" name="criptografia" required placeholder="Calificación (A, B, C, etc.)">
+          </div>
+          <div class="form-group">
+            <label for="sistemas_en_chip">Sistemas en Chip</label>
+            <input type="text" name="sistemas_en_chip" required placeholder="Calificación (A, B, C, etc.)">
+          </div>
+          <div class="form-group">
+            <label for="sistemas_distribuidos">Sistemas Distribuidos</label>
+            <input type="text" name="sistemas_distribuidos" required placeholder="Calificación (A, B, C, etc.)">
+          </div>
+          <div class="form-group">
+            <label for="llave_privada">Llave privada del staff</label>
+            <input type="file" name="llave_privada" required>
+          </div>
+          <button type="submit">Aceptar</button>
+        </form>
+      </section>
+    </div>
+    <div id="enviarModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Obtener Clave Secreta</h2>
+        <form id="form-clave" method="post"
+          enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="clave_simetrica_cifrada" class="label-modal">Sube la
+              clave secreta cifrada ChaCha20:</label>
+            <input type="file" name="clave_simetrica_cifrada"
+              id="clave_simetrica_cifrada" required>
+          </div>
+          <div class="form-group">
+            <label for="llave-privada" class="label-modal">Sube tu llave
+              privada:</label>
+            <input type="file" name="llave-privada"
+              id="llave-privada" required>
+          </div>
+          <button type="submit">Obtener Clave</button>
+        </form>
+      </div>
+    </div>
+    <div id="modalVerPDF" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="cerrarModalVerPDF()">&times;</span>
+                <h2>Descargar historial de preparatoria</h2>
+                <form id="form-ver-pdf">
+                    <div class="form-group">
+                        <label for="clave_chacha_pdf" class="label-modal">Sube la clave secreta ChahCha20</label>
+                        <input type="file" id="clave_chacha_pdf" required>
+                        <input type="hidden" id="id_doc_pdf">
+                    </div>
+                    <button type="submit">Descargar archivo</button>
+                </form>
+            </div>
+        </div>
+
+    <script>
+      // Enlaza el botón "Generar llaves" con el endpoint /auth/generar-claves
+      function postTo(url) {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = url;
+        document.body.appendChild(form);
+        form.submit();
+      }
+      document.getElementById("btn-generar-llaves").addEventListener("click", function() {
+        postTo("/auth/generar-claves");
+      });
+
+      // Actualizamos el listener para el botón "btn-obtener"
+      const modal = document.getElementById("enviarModal");
+      const btnObtener = document.getElementById("btn-obtener");
+      const closeModal = document.getElementsByClassName("close")[0];
+
+      btnObtener.addEventListener("click", function() {
+          modal.style.display = "block";
+      });
+
+      closeModal.addEventListener("click", function() {
+          modal.style.display = "none";
+      });
+
+      window.addEventListener("click", function(event) {
+          if (event.target == modal) {
+              modal.style.display = "none";
+          }
+      });
+
+      // Lógica del envío permanece igual
+      document.getElementById("form-clave").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const formData = new FormData();
+    const claveFile = document.getElementById("clave_simetrica_cifrada").files[0];
+    const llaveFile = document.getElementById("llave-privada").files[0];
+
+    if (!claveFile || !llaveFile) {
+        alert("Faltan campos por llenar");
+        return;
+    }
+
+    formData.append("clave_cifrada", claveFile);  // asegúrate de usar el mismo nombre que espera el backend
+    formData.append("llave_privada", llaveFile);
+
+    try {
+        const response = await fetch("/staff/descifrar-clave", {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const filename = "clave_simetrica.txt"; 
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            alert("Clave descargada correctamente");
+            modal.style.display = "none";
+        } else {
+            const error = await response.json();
+            alert("Error: " + error.detail);
+        }
+    } catch (err) {
+        console.error("Error al obtener clave:", err);
+        alert("Error inesperado");
+    }
+});
+
+function toggleCalificaciones(matricula) {
+    const div = document.getElementById('calificaciones-' + matricula);
+    div.style.display = div.style.display === 'none' ? 'block' : 'none';
+}
+//Visualizar historial académico de la prepartoria
+            const modalVerPDF = document.getElementById("modalVerPDF");
+            const formVerPDF = document.getElementById("form-ver-pdf");
+
+            function abrirModalVerPDF(id_doc) {
+                document.getElementById("id_doc_pdf").value = id_doc;
+                modalVerPDF.style.display = "block";
+            }
+
+            function cerrarModalVerPDF() {
+                modalVerPDF.style.display = "none";
+                formVerPDF.reset();
+            }
+
+            // Cerrar modal al hacer clic fuera
+            window.addEventListener("click", function (event) {
+                if (event.target == modalVerPDF) {
+                    cerrarModalVerPDF();
+                }
+            });
+
+            formVerPDF.addEventListener("submit", async function (event) {
+                event.preventDefault();
+
+                const claveFile = document.getElementById("clave_chacha_pdf").files[0];
+                const id_doc = document.getElementById("id_doc_pdf").value;
+
+                if (!claveFile) {
+                    alert("Por favor, selecciona una clave ChaCha.");
+                return;
+                }
+
+                const formData = new FormData();
+                formData.append("llave_simetrica", claveFile);
+
+                try {
+                    const response = await fetch(`/jefe/dashboard/descargarDocumento/${id_doc}`, {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        alert("Error: " + error.detail);
+                        return;
+                    }
+
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `expediente_${id_doc}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    cerrarModalVerPDF();
+
+                } catch (err) {
+                    console.error("Error al descargar el PDF:", err);
+                    alert("Error inesperado");
+                }
+            });
+    </script>
+  </body>
+</html>

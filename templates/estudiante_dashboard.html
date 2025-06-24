@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Estudiante</title>
+  <link rel="stylesheet" href="/static/stylesJefeDashboard.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-content">
+      <div class="nav-logo">
+        <h1>Expedientes Universitarios</h1>
+      </div>
+      <div class="nav-user">
+        <span class="user-name">{{ usuario.nombre }}</span>
+        <span class="user-role">{{ usuario.rol | capitalize }}</span>
+        <a href="/auth/logout" class="btn-logout">Cerrar sesión</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="dashboard-container">
+    <section class="list-section">
+      <h2>Historial Académico</h2>
+      <ul>
+        {% for item in usuario.estudiante.historial %}
+        <li>
+          <strong>{{ item.materia }}:</strong> {{ item.calificacion }}
+          <br>
+          <small>Última modificación: {{ item.ultima_modificacion }}</small>
+        </li>
+        {% endfor %}
+      </ul>
+      {% if not usuario.estudiante.historial %}
+      <p style="text-align: center; font-size: 1rem; color: #6b7280;">
+        No se han registrado calificaciones aún.
+      </p>
+      {% endif %}
+    </section>
+  </div>
+</body>
+</html>

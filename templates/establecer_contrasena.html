@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Establecer Contraseña</title>
+        <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+h1 {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 2rem;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+form {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 450px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+div {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+input[type="password"] {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    outline: none;
+}
+
+input[type="password"]:focus {
+    border-color: #b08bf8;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(176, 139, 248, 0.1);
+    transform: translateY(-2px);
+}
+
+input[type="password"]:hover {
+    border-color: #b08bf8;
+    background: white;
+}
+
+button {
+    width: 100%;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #b08bf8 0%, #9c6ef5 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+    box-shadow: 0 4px 15px rgba(176, 139, 248, 0.4);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(176, 139, 248, 0.6);
+    background: linear-gradient(135deg, #9c6ef5 0%, #8b5cf6 100%);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(176, 139, 248, 0.4);
+}
+
+p[style*="color:red"] {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    padding: 1rem;
+    border-radius: 12px;
+    border-left: 4px solid #ef4444;
+    margin-top: 1rem;
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 2rem;
+    }
+    
+    form {
+        padding: 2rem;
+        margin: 1rem;
+    }
+    
+    input[type="password"], button {
+        padding: 0.875rem;
+    }
+}
+
+form {
+    animation: fadeInUp 0.6s ease;
+}
+
+h1 {
+    animation: fadeInDown 0.6s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+        </style>
+    </head>
+    <body>
+        <h1>MODIFICA TU CONTRASEÑA</h1>
+        <form action="/auth/establecer-contraseña" method="post">
+            <input type="hidden" name="token" value="{{ token }}">
+            <div>
+                <label for="provisional">Contraseña provisional:</label>
+                <input type="password" id="provisional" name="provisional"
+                    required>
+            </div>
+            <div>
+                <label for="nueva_contrasena">Nueva contraseña:</label>
+                <input type="password" id="nueva_contrasena"
+                    name="nueva_contrasena" required>
+            </div>
+            <button type="submit">Establecer contraseña</button>
+        </form>
+        {% if error %}
+        <p style="color:red;">{{ error }}</p>
+        {% endif %}
+    </body>
+</html>
